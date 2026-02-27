@@ -4,7 +4,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -18,10 +18,10 @@ function parseArgs() {
   return params;
 }
 
-async function listIssues() {
+async function listCommits() {
   try {
     const params = parseArgs();
-    const { repo, state = 'open', author } = params;
+    const { repo, branch = 'main', limit = '10', author } = params;
 
     if (!repo) {
       console.error('Erro: --repo é obrigatório. Exemplo: --repo owner/repo-name');
@@ -30,9 +30,9 @@ async function listIssues() {
 
     const token = await mintToken();
 
-    let path = `/repos/${repo}/issues?state=${state}&per_page=30`;
+    let path = `/repos/${repo}/commits?sha=${branch}&per_page=${Math.min(limit, 30)}`;
     if (author) {
-      path += `&creator=${author}`;
+      path += `&author=${author}`;
     }
 
     const options = {
@@ -52,26 +52,26 @@ async function listIssues() {
         res.on('data', (chunk) => { data += chunk; });
         res.on('end', () => {
           try {
-            const issues = JSON.parse(data);
+            const commits = JSON.parse(data);
             
-            console.log(`\n📋 Issues - ${repo} (${state})\n`);
-            if (!Array.isArray(issues) || issues.length === 0) {
-              console.log('Nenhum issue encontrado.');
+            console.log(`\n📝 Commits - ${repo}/${branch}\n`);
+            if (!Array.isArray(commits) || commits.length === 0) {
+              console.log('Nenhum commit encontrado.');
               resolve([]);
               return;
             }
 
-            issues.forEach((issue, i) => {
-              const status = issue.state === 'open' ? '🟢 ABERTO' : '🔴 FECHADO';
-              const date = new Date(issue.created_at).toLocaleDateString('pt-BR');
-              console.log(`${i + 1}. ${status} #${issue.number} - ${issue.title}`);
-              console.log(`   └─ Autor: ${issue.user.login} (${date})`);
-              if (issue.labels && issue.labels.length > 0) {
-                const labels = issue.labels.map(l => l.name).join(', ');
-                console.log(`   └─ Labels: ${labels}`);
-              }
+            commits.forEach((commit, i) => {
+              const sha = commit.sha.substring(0, 7);
+              const date = new Date(commit.commit.author.date).toLocaleDateString('pt-BR', {
+                year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+              });
+              const author = commit.commit.author.name;
+              const message = commit.commit.message.split('\n')[0].substring(0, 60);
+              console.log(`${i + 1}. ${sha} - ${message}`);
+              console.log(`   └─ ${author} (${date})`);
             });
-            resolve(issues);
+            resolve(commits);
           } catch (e) {
             reject(e);
           }
@@ -79,9 +79,9 @@ async function listIssues() {
       }).on('error', reject).end();
     });
   } catch (error) {
-    console.error('Erro ao listar issues:', error.message);
+    console.error('Erro ao listar commits:', error.message);
     process.exit(1);
   }
 }
 
-listIssues().catch(console.error);
+listCommits().catch(console.error);

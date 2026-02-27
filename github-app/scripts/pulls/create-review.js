@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,33 +17,39 @@ function parseArgs() {
   return params;
 }
 
-async function createIssue() {
+async function createReview() {
   try {
     const params = parseArgs();
-    const { repo, title, body = '', labels } = params;
+    const { repo, number, event, body = '' } = params;
 
-    if (!repo || !title) {
-      console.error('Erro: --repo e --title são obrigatórios');
-      console.error('Uso: node create-issue.js --repo owner/repo --title "Título" --body "Descrição" --labels "bug,urgent"');
+    if (!repo || !number || !event) {
+      console.error('Erro: --repo, --number e --event são obrigatórios');
+      console.error('Uso: node create-review.js --repo owner/repo --number 42 --event APPROVE|REQUEST_CHANGES|COMMENT --body "Mensagem"');
+      console.error('\nEventos válidos:');
+      console.error('  APPROVE - Aprovar o PR');
+      console.error('  REQUEST_CHANGES - Solicitar mudanças');
+      console.error('  COMMENT - Apenas comentar (sem decisão)');
+      process.exit(1);
+    }
+
+    const validEvents = ['APPROVE', 'REQUEST_CHANGES', 'COMMENT'];
+    if (!validEvents.includes(event)) {
+      console.error(`Erro: --event deve ser um de: ${validEvents.join(', ')}`);
       process.exit(1);
     }
 
     const token = await mintToken();
 
     const payload = {
-      title,
+      event: event,
       body: body || '',
     };
-
-    if (labels) {
-      payload.labels = labels.split(',').map(l => l.trim());
-    }
 
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/issues`,
+      path: `/repos/${repo}/pulls/${number}/reviews`,
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -62,9 +68,16 @@ async function createIssue() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 201) {
-              console.log(`\n✅ Issue criada com sucesso!\n`);
-              console.log(`📌 #${json.number} - ${json.title}`);
-              console.log(`🔗 ${json.html_url}`);
+              const eventEmoji = {
+                'APPROVE': '✅ APROVADO',
+                'REQUEST_CHANGES': '⛔ MUDANÇAS SOLICITADAS',
+                'COMMENT': '💬 COMENTÁRIO'
+              };
+              console.log(`\n✅ Review enviado com sucesso!\n`);
+              console.log(`${eventEmoji[event]} #${json.pull_request_review_id}`);
+              console.log(`Usuário: ${json.user.login}`);
+              console.log(`Estado: ${json.state}`);
+              if (body) console.log(`Mensagem: ${body}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -80,9 +93,9 @@ async function createIssue() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao criar issue:', error.message);
+    console.error('Erro ao criar review:', error.message);
     process.exit(1);
   }
 }
 
-createIssue().catch(console.error);
+createReview().catch(console.error);

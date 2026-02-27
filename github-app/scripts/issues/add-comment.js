@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,39 +17,24 @@ function parseArgs() {
   return params;
 }
 
-async function createReview() {
+async function addComment() {
   try {
     const params = parseArgs();
-    const { repo, number, event, body = '' } = params;
+    const { repo, number, body } = params;
 
-    if (!repo || !number || !event) {
-      console.error('Erro: --repo, --number e --event são obrigatórios');
-      console.error('Uso: node create-review.js --repo owner/repo --number 42 --event APPROVE|REQUEST_CHANGES|COMMENT --body "Mensagem"');
-      console.error('\nEventos válidos:');
-      console.error('  APPROVE - Aprovar o PR');
-      console.error('  REQUEST_CHANGES - Solicitar mudanças');
-      console.error('  COMMENT - Apenas comentar (sem decisão)');
-      process.exit(1);
-    }
-
-    const validEvents = ['APPROVE', 'REQUEST_CHANGES', 'COMMENT'];
-    if (!validEvents.includes(event)) {
-      console.error(`Erro: --event deve ser um de: ${validEvents.join(', ')}`);
+    if (!repo || !number || !body) {
+      console.error('Erro: --repo, --number e --body são obrigatórios');
+      console.error('Uso: node add-comment.js --repo owner/repo --number 42 --body "Comentário aqui"');
       process.exit(1);
     }
 
     const token = await mintToken();
-
-    const payload = {
-      event: event,
-      body: body || '',
-    };
-
+    const payload = { body };
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/pulls/${number}/reviews`,
+      path: `/repos/${repo}/issues/${number}/comments`,
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -68,16 +53,9 @@ async function createReview() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 201) {
-              const eventEmoji = {
-                'APPROVE': '✅ APROVADO',
-                'REQUEST_CHANGES': '⛔ MUDANÇAS SOLICITADAS',
-                'COMMENT': '💬 COMENTÁRIO'
-              };
-              console.log(`\n✅ Review enviado com sucesso!\n`);
-              console.log(`${eventEmoji[event]} #${json.pull_request_review_id}`);
-              console.log(`Usuário: ${json.user.login}`);
-              console.log(`Estado: ${json.state}`);
-              if (body) console.log(`Mensagem: ${body}`);
+              console.log(`\n✅ Comentário adicionado!\n`);
+              console.log(`💬 ${json.body.substring(0, 60)}...`);
+              console.log(`🔗 ${json.html_url}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -93,9 +71,9 @@ async function createReview() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao criar review:', error.message);
+    console.error('Erro ao adicionar comentário:', error.message);
     process.exit(1);
   }
 }
 
-createReview().catch(console.error);
+addComment().catch(console.error);

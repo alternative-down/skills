@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,34 +17,33 @@ function parseArgs() {
   return params;
 }
 
-async function createRepo() {
+async function createIssue() {
   try {
     const params = parseArgs();
-    const { name, description = '', private: isPrivate = 'false', issues = 'true', projects = 'true' } = params;
+    const { repo, title, body = '', labels } = params;
 
-    if (!name) {
-      console.error('Erro: --name é obrigatório');
-      console.error('Uso: node create-repo.js --name repo-name --description "Descrição" --private false');
+    if (!repo || !title) {
+      console.error('Erro: --repo e --title são obrigatórios');
+      console.error('Uso: node create-issue.js --repo owner/repo --title "Título" --body "Descrição" --labels "bug,urgent"');
       process.exit(1);
     }
 
     const token = await mintToken();
 
     const payload = {
-      name,
-      description: description || '',
-      private: isPrivate === 'true',
-      has_issues: issues === 'true',
-      has_projects: projects === 'true',
-      has_downloads: false,
-      has_wiki: false,
+      title,
+      body: body || '',
     };
+
+    if (labels) {
+      payload.labels = labels.split(',').map(l => l.trim());
+    }
 
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: '/orgs/alternative-down/repos',
+      path: `/repos/${repo}/issues`,
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -63,11 +62,9 @@ async function createRepo() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 201) {
-              const privacy = json.private ? '🔒' : '🌐';
-              console.log(`\n✅ Repositório criado!\n`);
-              console.log(`${privacy} ${json.name}`);
+              console.log(`\n✅ Issue criada com sucesso!\n`);
+              console.log(`📌 #${json.number} - ${json.title}`);
               console.log(`🔗 ${json.html_url}`);
-              console.log(`📋 ${json.description || '(sem descrição)'}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -83,9 +80,9 @@ async function createRepo() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao criar repositório:', error.message);
+    console.error('Erro ao criar issue:', error.message);
     process.exit(1);
   }
 }
 
-createRepo().catch(console.error);
+createIssue().catch(console.error);

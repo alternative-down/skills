@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 const https = require('https');
 const { execSync } = require('child_process');
-const readline = require('readline');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -18,48 +17,27 @@ function parseArgs() {
   return params;
 }
 
-function askConfirmation(repoName) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-
-    rl.question(`\n⚠️  Tem certeza que quer deletar "${repoName}"? (yes/no): `, (answer) => {
-      rl.close();
-      resolve(answer.toLowerCase() === 'yes');
-    });
-  });
-}
-
-async function deleteRepo() {
+async function deleteBranch() {
   try {
     const params = parseArgs();
-    const { repo } = params;
+    const { repo, branch } = params;
 
-    if (!repo) {
-      console.error('Erro: --repo é obrigatório');
-      console.error('Uso: node delete-repo.js --repo owner/repo-name');
+    if (!repo || !branch) {
+      console.error('Erro: --repo e --branch são obrigatórios');
+      console.error('Uso: node delete-branch.js --repo owner/repo --branch feature-branch');
       process.exit(1);
     }
 
-    const [owner, name] = repo.split('/');
-    if (!owner || !name) {
-      console.error('Erro: formato --repo deve ser owner/repo-name');
+    if (branch === 'main' || branch === 'master') {
+      console.error(`❌ Erro: Não é possível deletar a branch principal "${branch}"`);
       process.exit(1);
-    }
-
-    const confirmed = await askConfirmation(repo);
-    if (!confirmed) {
-      console.log('❌ Operação cancelada.');
-      process.exit(0);
     }
 
     const token = await mintToken();
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}`,
+      path: `/repos/${repo}/git/refs/heads/${branch}`,
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -75,8 +53,8 @@ async function deleteRepo() {
         res.on('end', () => {
           try {
             if (res.statusCode === 204) {
-              console.log(`\n✅ Repositório deletado!\n`);
-              console.log(`🗑️  ${repo}`);
+              console.log(`\n✅ Branch deletado!\n`);
+              console.log(`🗑️  ${branch}`);
               resolve({ success: true });
             } else {
               const json = JSON.parse(responseData);
@@ -90,9 +68,9 @@ async function deleteRepo() {
       }).on('error', reject).end();
     });
   } catch (error) {
-    console.error('Erro ao deletar repositório:', error.message);
+    console.error('Erro ao deletar branch:', error.message);
     process.exit(1);
   }
 }
 
-deleteRepo().catch(console.error);
+deleteBranch().catch(console.error);

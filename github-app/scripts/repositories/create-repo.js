@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,24 +17,34 @@ function parseArgs() {
   return params;
 }
 
-async function addComment() {
+async function createRepo() {
   try {
     const params = parseArgs();
-    const { repo, number, body } = params;
+    const { name, description = '', private: isPrivate = 'false', issues = 'true', projects = 'true' } = params;
 
-    if (!repo || !number || !body) {
-      console.error('Erro: --repo, --number e --body são obrigatórios');
-      console.error('Uso: node add-comment.js --repo owner/repo --number 42 --body "Comentário aqui"');
+    if (!name) {
+      console.error('Erro: --name é obrigatório');
+      console.error('Uso: node create-repo.js --name repo-name --description "Descrição" --private false');
       process.exit(1);
     }
 
     const token = await mintToken();
-    const payload = { body };
+
+    const payload = {
+      name,
+      description: description || '',
+      private: isPrivate === 'true',
+      has_issues: issues === 'true',
+      has_projects: projects === 'true',
+      has_downloads: false,
+      has_wiki: false,
+    };
+
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/issues/${number}/comments`,
+      path: '/orgs/alternative-down/repos',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -53,9 +63,11 @@ async function addComment() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 201) {
-              console.log(`\n✅ Comentário adicionado!\n`);
-              console.log(`💬 ${json.body.substring(0, 60)}...`);
+              const privacy = json.private ? '🔒' : '🌐';
+              console.log(`\n✅ Repositório criado!\n`);
+              console.log(`${privacy} ${json.name}`);
               console.log(`🔗 ${json.html_url}`);
+              console.log(`📋 ${json.description || '(sem descrição)'}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -71,9 +83,9 @@ async function addComment() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao adicionar comentário:', error.message);
+    console.error('Erro ao criar repositório:', error.message);
     process.exit(1);
   }
 }
 
-addComment().catch(console.error);
+createRepo().catch(console.error);

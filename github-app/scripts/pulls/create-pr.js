@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,38 +17,33 @@ function parseArgs() {
   return params;
 }
 
-async function updateRepo() {
+async function createPR() {
   try {
     const params = parseArgs();
-    const { repo, description, private: isPrivate, issues, projects } = params;
+    const { repo, title, body = '', head, base = 'main', draft = 'false' } = params;
 
-    if (!repo) {
-      console.error('Erro: --repo é obrigatório');
-      console.error('Uso: node update-repo.js --repo owner/repo --description "Nova descrição" --private false');
+    if (!repo || !title || !head) {
+      console.error('Erro: --repo, --title e --head são obrigatórios');
+      console.error('Uso: node create-pr.js --repo owner/repo --title "Título" --head feature-branch --base main --body "Descrição"');
       process.exit(1);
     }
 
     const token = await mintToken();
 
-    const payload = {};
-    
-    if (description) payload.description = description;
-    if (isPrivate !== undefined) payload.private = isPrivate === 'true';
-    if (issues !== undefined) payload.has_issues = issues === 'true';
-    if (projects !== undefined) payload.has_projects = projects === 'true';
-
-    if (Object.keys(payload).length === 0) {
-      console.error('Erro: Especifique pelo menos um parâmetro para atualizar');
-      console.error('Parâmetros disponíveis: --description, --private, --issues, --projects');
-      process.exit(1);
-    }
+    const payload = {
+      title,
+      body: body || '',
+      head,
+      base,
+      draft: draft === 'true',
+    };
 
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}`,
-      method: 'PATCH',
+      path: `/repos/${repo}/pulls`,
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
@@ -65,13 +60,12 @@ async function updateRepo() {
         res.on('end', () => {
           try {
             const json = JSON.parse(responseData);
-            if (res.statusCode === 200) {
-              console.log(`\n✅ Repositório atualizado!\n`);
-              console.log(`📦 ${json.name}`);
-              if (description) console.log(`📝 ${json.description}`);
-              if (isPrivate) console.log(`🔒 Privado: ${json.private}`);
-              if (issues) console.log(`📌 Issues: ${json.has_issues}`);
-              if (projects) console.log(`📊 Projects: ${json.has_projects}`);
+            if (res.statusCode === 201) {
+              const status = json.draft ? '🟡 DRAFT' : '🟢 ABERTO';
+              console.log(`\n✅ PR criado com sucesso!\n`);
+              console.log(`${status} #${json.number} - ${json.title}`);
+              console.log(`Branch: ${json.head.ref} → ${json.base.ref}`);
+              console.log(`🔗 ${json.html_url}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -87,9 +81,9 @@ async function updateRepo() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao atualizar repositório:', error.message);
+    console.error('Erro ao criar PR:', error.message);
     process.exit(1);
   }
 }
 
-updateRepo().catch(console.error);
+createPR().catch(console.error);

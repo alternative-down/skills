@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,32 +17,26 @@ function parseArgs() {
   return params;
 }
 
-async function createPR() {
+async function addLabels() {
   try {
     const params = parseArgs();
-    const { repo, title, body = '', head, base = 'main', draft = 'false' } = params;
+    const { repo, number, labels } = params;
 
-    if (!repo || !title || !head) {
-      console.error('Erro: --repo, --title e --head são obrigatórios');
-      console.error('Uso: node create-pr.js --repo owner/repo --title "Título" --head feature-branch --base main --body "Descrição"');
+    if (!repo || !number || !labels) {
+      console.error('Erro: --repo, --number e --labels são obrigatórios');
+      console.error('Uso: node add-labels.js --repo owner/repo --number 42 --labels "bug,urgent,p1"');
       process.exit(1);
     }
 
     const token = await mintToken();
 
-    const payload = {
-      title,
-      body: body || '',
-      head,
-      base,
-      draft: draft === 'true',
-    };
-
+    const labelList = labels.split(',').map(l => l.trim());
+    const payload = { labels: labelList };
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/pulls`,
+      path: `/repos/${repo}/issues/${number}/labels`,
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -60,12 +54,11 @@ async function createPR() {
         res.on('end', () => {
           try {
             const json = JSON.parse(responseData);
-            if (res.statusCode === 201) {
-              const status = json.draft ? '🟡 DRAFT' : '🟢 ABERTO';
-              console.log(`\n✅ PR criado com sucesso!\n`);
-              console.log(`${status} #${json.number} - ${json.title}`);
-              console.log(`Branch: ${json.head.ref} → ${json.base.ref}`);
-              console.log(`🔗 ${json.html_url}`);
+            if (res.statusCode === 200) {
+              console.log(`\n✅ Labels adicionados!\n`);
+              console.log(`🏷️  #${number}`);
+              const labelNames = json.map(l => l.name).join(', ');
+              console.log(`Labels: ${labelNames}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -81,9 +74,9 @@ async function createPR() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao criar PR:', error.message);
+    console.error('Erro ao adicionar labels:', error.message);
     process.exit(1);
   }
 }
 
-createPR().catch(console.error);
+addLabels().catch(console.error);

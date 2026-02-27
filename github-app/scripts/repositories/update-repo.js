@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,27 +17,38 @@ function parseArgs() {
   return params;
 }
 
-async function addLabels() {
+async function updateRepo() {
   try {
     const params = parseArgs();
-    const { repo, number, labels } = params;
+    const { repo, description, private: isPrivate, issues, projects } = params;
 
-    if (!repo || !number || !labels) {
-      console.error('Erro: --repo, --number e --labels são obrigatórios');
-      console.error('Uso: node add-labels.js --repo owner/repo --number 42 --labels "bug,urgent,p1"');
+    if (!repo) {
+      console.error('Erro: --repo é obrigatório');
+      console.error('Uso: node update-repo.js --repo owner/repo --description "Nova descrição" --private false');
       process.exit(1);
     }
 
     const token = await mintToken();
 
-    const labelList = labels.split(',').map(l => l.trim());
-    const payload = { labels: labelList };
+    const payload = {};
+    
+    if (description) payload.description = description;
+    if (isPrivate !== undefined) payload.private = isPrivate === 'true';
+    if (issues !== undefined) payload.has_issues = issues === 'true';
+    if (projects !== undefined) payload.has_projects = projects === 'true';
+
+    if (Object.keys(payload).length === 0) {
+      console.error('Erro: Especifique pelo menos um parâmetro para atualizar');
+      console.error('Parâmetros disponíveis: --description, --private, --issues, --projects');
+      process.exit(1);
+    }
+
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/issues/${number}/labels`,
-      method: 'POST',
+      path: `/repos/${repo}`,
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
@@ -55,10 +66,12 @@ async function addLabels() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 200) {
-              console.log(`\n✅ Labels adicionados!\n`);
-              console.log(`🏷️  #${number}`);
-              const labelNames = json.map(l => l.name).join(', ');
-              console.log(`Labels: ${labelNames}`);
+              console.log(`\n✅ Repositório atualizado!\n`);
+              console.log(`📦 ${json.name}`);
+              if (description) console.log(`📝 ${json.description}`);
+              if (isPrivate) console.log(`🔒 Privado: ${json.private}`);
+              if (issues) console.log(`📌 Issues: ${json.has_issues}`);
+              if (projects) console.log(`📊 Projects: ${json.has_projects}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -74,9 +87,9 @@ async function addLabels() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao adicionar labels:', error.message);
+    console.error('Erro ao atualizar repositório:', error.message);
     process.exit(1);
   }
 }
 
-addLabels().catch(console.error);
+updateRepo().catch(console.error);

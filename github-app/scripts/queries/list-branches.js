@@ -4,7 +4,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -18,10 +18,10 @@ function parseArgs() {
   return params;
 }
 
-async function listCommits() {
+async function listBranches() {
   try {
     const params = parseArgs();
-    const { repo, branch = 'main', limit = '10', author } = params;
+    const { repo, pattern } = params;
 
     if (!repo) {
       console.error('Erro: --repo é obrigatório. Exemplo: --repo owner/repo-name');
@@ -30,10 +30,7 @@ async function listCommits() {
 
     const token = await mintToken();
 
-    let path = `/repos/${repo}/commits?sha=${branch}&per_page=${Math.min(limit, 30)}`;
-    if (author) {
-      path += `&author=${author}`;
-    }
+    const path = `/repos/${repo}/branches?per_page=30`;
 
     const options = {
       hostname: 'api.github.com',
@@ -52,26 +49,28 @@ async function listCommits() {
         res.on('data', (chunk) => { data += chunk; });
         res.on('end', () => {
           try {
-            const commits = JSON.parse(data);
+            let branches = JSON.parse(data);
             
-            console.log(`\n📝 Commits - ${repo}/${branch}\n`);
-            if (!Array.isArray(commits) || commits.length === 0) {
-              console.log('Nenhum commit encontrado.');
+            // Filtrar por padrão se especificado
+            if (pattern) {
+              const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+              branches = branches.filter(b => regex.test(b.name));
+            }
+
+            console.log(`\n🌿 Branches - ${repo}\n`);
+            if (!Array.isArray(branches) || branches.length === 0) {
+              console.log('Nenhum branch encontrado.');
               resolve([]);
               return;
             }
 
-            commits.forEach((commit, i) => {
-              const sha = commit.sha.substring(0, 7);
-              const date = new Date(commit.commit.author.date).toLocaleDateString('pt-BR', {
-                year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-              });
-              const author = commit.commit.author.name;
-              const message = commit.commit.message.split('\n')[0].substring(0, 60);
-              console.log(`${i + 1}. ${sha} - ${message}`);
-              console.log(`   └─ ${author} (${date})`);
+            branches.forEach((branch, i) => {
+              const protection = branch.protected ? '🔒' : '🔓';
+              const sha = branch.commit.sha.substring(0, 7);
+              console.log(`${i + 1}. ${protection} ${branch.name}`);
+              console.log(`   └─ Commit: ${sha}`);
             });
-            resolve(commits);
+            resolve(branches);
           } catch (e) {
             reject(e);
           }
@@ -79,9 +78,9 @@ async function listCommits() {
       }).on('error', reject).end();
     });
   } catch (error) {
-    console.error('Erro ao listar commits:', error.message);
+    console.error('Erro ao listar branches:', error.message);
     process.exit(1);
   }
 }
 
-listCommits().catch(console.error);
+listBranches().catch(console.error);

@@ -4,7 +4,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -18,10 +18,10 @@ function parseArgs() {
   return params;
 }
 
-async function listBranches() {
+async function listIssues() {
   try {
     const params = parseArgs();
-    const { repo, pattern } = params;
+    const { repo, state = 'open', author } = params;
 
     if (!repo) {
       console.error('Erro: --repo é obrigatório. Exemplo: --repo owner/repo-name');
@@ -30,7 +30,10 @@ async function listBranches() {
 
     const token = await mintToken();
 
-    const path = `/repos/${repo}/branches?per_page=30`;
+    let path = `/repos/${repo}/issues?state=${state}&per_page=30`;
+    if (author) {
+      path += `&creator=${author}`;
+    }
 
     const options = {
       hostname: 'api.github.com',
@@ -49,28 +52,26 @@ async function listBranches() {
         res.on('data', (chunk) => { data += chunk; });
         res.on('end', () => {
           try {
-            let branches = JSON.parse(data);
+            const issues = JSON.parse(data);
             
-            // Filtrar por padrão se especificado
-            if (pattern) {
-              const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-              branches = branches.filter(b => regex.test(b.name));
-            }
-
-            console.log(`\n🌿 Branches - ${repo}\n`);
-            if (!Array.isArray(branches) || branches.length === 0) {
-              console.log('Nenhum branch encontrado.');
+            console.log(`\n📋 Issues - ${repo} (${state})\n`);
+            if (!Array.isArray(issues) || issues.length === 0) {
+              console.log('Nenhum issue encontrado.');
               resolve([]);
               return;
             }
 
-            branches.forEach((branch, i) => {
-              const protection = branch.protected ? '🔒' : '🔓';
-              const sha = branch.commit.sha.substring(0, 7);
-              console.log(`${i + 1}. ${protection} ${branch.name}`);
-              console.log(`   └─ Commit: ${sha}`);
+            issues.forEach((issue, i) => {
+              const status = issue.state === 'open' ? '🟢 ABERTO' : '🔴 FECHADO';
+              const date = new Date(issue.created_at).toLocaleDateString('pt-BR');
+              console.log(`${i + 1}. ${status} #${issue.number} - ${issue.title}`);
+              console.log(`   └─ Autor: ${issue.user.login} (${date})`);
+              if (issue.labels && issue.labels.length > 0) {
+                const labels = issue.labels.map(l => l.name).join(', ');
+                console.log(`   └─ Labels: ${labels}`);
+              }
             });
-            resolve(branches);
+            resolve(issues);
           } catch (e) {
             reject(e);
           }
@@ -78,9 +79,9 @@ async function listBranches() {
       }).on('error', reject).end();
     });
   } catch (error) {
-    console.error('Erro ao listar branches:', error.message);
+    console.error('Erro ao listar issues:', error.message);
     process.exit(1);
   }
 }
 
-listBranches().catch(console.error);
+listIssues().catch(console.error);

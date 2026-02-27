@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,36 +17,37 @@ function parseArgs() {
   return params;
 }
 
-async function protectBranch() {
+async function mergePR() {
   try {
     const params = parseArgs();
-    const { repo, branch, require_pr = 'true', require_review = 'false' } = params;
+    const { repo, number, method = 'merge', title, message } = params;
 
-    if (!repo || !branch) {
-      console.error('Erro: --repo e --branch são obrigatórios');
-      console.error('Uso: node protect-branch.js --repo owner/repo --branch main --require_pr true');
+    if (!repo || !number) {
+      console.error('Erro: --repo e --number são obrigatórios');
+      console.error('Uso: node merge-pr.js --repo owner/repo --number 42 --method merge');
+      console.error('Métodos: merge, squash, rebase');
+      process.exit(1);
+    }
+
+    if (!['merge', 'squash', 'rebase'].includes(method)) {
+      console.error('Erro: --method deve ser "merge", "squash" ou "rebase"');
       process.exit(1);
     }
 
     const token = await mintToken();
 
     const payload = {
-      enforce_admins: true,
-      required_pull_request_reviews: {
-        required_approving_review_count: require_review === 'true' ? 1 : 0,
-      },
-      required_status_checks: {
-        strict: true,
-        contexts: [],
-      },
-      restrictions: null,
+      merge_method: method,
     };
+
+    if (title) payload.commit_title = title;
+    if (message) payload.commit_message = message;
 
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/branches/${branch}/protection`,
+      path: `/repos/${repo}/pulls/${number}/merge`,
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -65,14 +66,14 @@ async function protectBranch() {
           try {
             const json = JSON.parse(responseData);
             if (res.statusCode === 200) {
-              console.log(`\n✅ Branch protegido!\n`);
-              console.log(`🔒 ${branch}`);
-              console.log(`📦 ${repo}`);
-              console.log(`Proteções ativadas:`);
-              console.log(`   - Enforce admins: ✅`);
-              console.log(`   - PR obrigatório: ${require_pr === 'true' ? '✅' : '❌'}`);
-              console.log(`   - Review obrigatório: ${require_review === 'true' ? '✅' : '❌'}`);
+              console.log(`\n✅ PR mergeado com sucesso!\n`);
+              console.log(`🟣 #${number}`);
+              console.log(`Método: ${method}`);
+              console.log(`SHA: ${json.sha.substring(0, 7)}`);
               resolve(json);
+            } else if (res.statusCode === 405) {
+              console.error(`❌ PR não pode ser mergeado (já foi mergeado ou está conflitado)`);
+              reject(new Error('PR merge conflict or already merged'));
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
               reject(new Error(json.message));
@@ -87,9 +88,9 @@ async function protectBranch() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao proteger branch:', error.message);
+    console.error('Erro ao mergear PR:', error.message);
     process.exit(1);
   }
 }
 
-protectBranch().catch(console.error);
+mergePR().catch(console.error);

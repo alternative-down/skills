@@ -3,7 +3,7 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
@@ -17,35 +17,25 @@ function parseArgs() {
   return params;
 }
 
-async function requestReviewers() {
+async function closeIssue() {
   try {
     const params = parseArgs();
-    const { repo, number, reviewers } = params;
+    const { repo, number } = params;
 
-    if (!repo || !number || !reviewers) {
-      console.error('Erro: --repo, --number e --reviewers são obrigatórios');
-      console.error('Uso: node request-reviewers.js --repo owner/repo --number 42 --reviewers "user1,user2,user3"');
-      process.exit(1);
-    }
-
-    const reviewersList = reviewers.split(',').map(r => r.trim()).filter(r => r);
-    if (reviewersList.length === 0) {
-      console.error('Erro: --reviewers deve conter pelo menos um usuário');
+    if (!repo || !number) {
+      console.error('Erro: --repo e --number são obrigatórios');
+      console.error('Uso: node close-issue.js --repo owner/repo --number 42');
       process.exit(1);
     }
 
     const token = await mintToken();
-
-    const payload = {
-      reviewers: reviewersList,
-    };
-
+    const payload = { state: 'closed' };
     const data = JSON.stringify(payload);
 
     const options = {
       hostname: 'api.github.com',
-      path: `/repos/${repo}/pulls/${number}/requested_reviewers`,
-      method: 'POST',
+      path: `/repos/${repo}/issues/${number}`,
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
@@ -62,15 +52,10 @@ async function requestReviewers() {
         res.on('end', () => {
           try {
             const json = JSON.parse(responseData);
-            if (res.statusCode === 201) {
-              console.log(`\n✅ Reviewers atribuídos com sucesso!\n`);
-              console.log(`PR #${json.number} - ${json.title}`);
-              console.log(`\n📋 Reviewers solicitados:`);
-              if (json.requested_reviewers && json.requested_reviewers.length > 0) {
-                json.requested_reviewers.forEach((reviewer, idx) => {
-                  console.log(`  ${idx + 1}. @${reviewer.login}`);
-                });
-              }
+            if (res.statusCode === 200) {
+              console.log(`\n✅ Issue fechada!\n`);
+              console.log(`🔴 #${json.number} - ${json.title}`);
+              console.log(`🔗 ${json.html_url}`);
               resolve(json);
             } else {
               console.error(`Erro (${res.statusCode}):`, json.message || responseData);
@@ -86,9 +71,9 @@ async function requestReviewers() {
       req.end();
     });
   } catch (error) {
-    console.error('Erro ao solicitar reviewers:', error.message);
+    console.error('Erro ao fechar issue:', error.message);
     process.exit(1);
   }
 }
 
-requestReviewers().catch(console.error);
+closeIssue().catch(console.error);
