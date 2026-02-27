@@ -20,7 +20,7 @@ echo ""
 
 # 1. Criar issue
 echo "📌 [1/4] Criando issue..."
-ISSUE_OUTPUT=$(node "$SCRIPT_DIR/create-issue.js" \
+ISSUE_OUTPUT=$(node "$SCRIPT_DIR/issues/create-issue.js" \
   --repo "$REPO" \
   --title "$TITLE" \
   --body "$BODY" \
@@ -38,7 +38,7 @@ echo ""
 
 # 2. Adicionar comentário
 echo "💬 [2/4] Adicionando comentário..."
-node "$SCRIPT_DIR/add-comment.js" \
+node "$SCRIPT_DIR/issues/add-comment.js" \
   --repo "$REPO" \
   --number "$ISSUE_NUM" \
   --body "This issue was created by an automated workflow. Status: IN_PROGRESS"
@@ -48,7 +48,7 @@ echo ""
 
 # 3. Adicionar mais labels
 echo "🏷️  [3/4] Adicionando labels adicionais..."
-node "$SCRIPT_DIR/add-labels.js" \
+node "$SCRIPT_DIR/issues/add-labels.js" \
   --repo "$REPO" \
   --number "$ISSUE_NUM" \
   --labels "workflow,automated"
@@ -58,7 +58,7 @@ echo ""
 
 # 4. Fechar issue
 echo "🔴 [4/4] Fechando issue..."
-node "$SCRIPT_DIR/close-issue.js" \
+node "$SCRIPT_DIR/issues/close-issue.js" \
   --repo "$REPO" \
   --number "$ISSUE_NUM"
 

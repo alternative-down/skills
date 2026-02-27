@@ -10,7 +10,7 @@ Repositório de skills (habilidades) para **OpenClaw** — automações reutiliz
 
 Acesso seguro ao GitHub sem expor tokens. Suporta operações em repositórios, issues, PRs, branches, commits e reviews.
 
-**23 scripts individuais + 4 workflows prontos para produção:**
+**28 scripts organizados por contexto + 4 workflows prontos para produção:**
 
 ---
 
@@ -58,71 +58,99 @@ bash ~/.openclaw/skills/github-app/scripts/workflows/branch-management.sh \
 
 ---
 
-## 📚 Individual Scripts
+## 📁 Scripts Organizados por Contexto
 
-### 📊 Queries (5)
-- `list-repos.js` — Lista repositórios da organização
-- `list-issues.js` — Lista issues com filtros
-- `list-prs.js` — Lista pull requests
-- `list-branches.js` — Lista branches
-- `list-commits.js` — Lista commits
+### 📊 Queries (8 scripts - Leitura & Informação)
+```bash
+queries/
+├── list-repos.js           # Listar repositórios
+├── list-issues.js          # Listar issues
+├── list-prs.js             # Listar pull requests
+├── list-branches.js        # Listar branches
+├── list-commits.js         # Listar commits
+├── list-reviews.js         # Listar reviews de PR
+├── get-repo-info.js        # Informações completas do repo
+└── get-pr-diff.js          # Diff completo de PR
+```
 
-### 📝 Issues & Comments (4)
-- `create-issue.js` — Criar issue
-- `add-comment.js` — Comentar em issues/PRs
-- `add-labels.js` — Adicionar labels
-- `close-issue.js` — Fechar issue
+### 📋 Issues (4 scripts - Gerenciar Issues)
+```bash
+issues/
+├── create-issue.js         # Criar issue
+├── close-issue.js          # Fechar issue
+├── add-comment.js          # Comentar em issue/PR
+└── add-labels.js           # Adicionar labels
+```
 
-### 🔀 Pull Requests (4)
-- `create-pr.js` — Criar PR
-- `merge-pr.js` — Mergear PR (merge/squash/rebase)
-- `list-reviews.js` — Listar reviews
-- `create-review.js` — Deixar review (APPROVE/REQUEST_CHANGES/COMMENT)
-- `request-reviewers.js` — Atribuir reviewers
-- `get-pr-diff.js` — Obter diff completo
+### 🔀 Pulls (5 scripts - Gerenciar Pull Requests)
+```bash
+pulls/
+├── create-pr.js            # Criar PR
+├── merge-pr.js             # Mergear PR
+├── create-review.js        # Deixar review (APPROVE/REQUEST_CHANGES/COMMENT)
+├── request-reviewers.js    # Atribuir reviewers
+└── add-review-comment.js   # Comentar em linha específica
+```
 
-### 🌿 Branches (2)
-- `delete-branch.js` — Deletar branch
-- `protect-branch.js` — Proteger branch
+### 📦 Repositories (3 scripts - Gerenciar Repositórios)
+```bash
+repositories/
+├── create-repo.js          # Criar repositório
+├── update-repo.js          # Atualizar configurações
+└── delete-repo.js          # Deletar repositório
+```
 
-### 📦 Repositórios (4)
-- `create-repo.js` — Criar repositório
-- `get-repo-info.js` — Informações do repo
-- `update-repo.js` — Atualizar configurações
-- `delete-repo.js` — Deletar repositório
+### 🌿 Branches (2 scripts - Gerenciar Branches)
+```bash
+branches/
+├── delete-branch.js        # Deletar branch
+└── protect-branch.js       # Proteger branch
+```
 
-### 💬 Code Reviews (1)
-- `add-review-comment.js` — Comentar em linhas específicas de código
+### 🔐 Auth (1 script - Autenticação)
+```bash
+auth/
+└── mint_installation_token.js  # Gerar token temporário
+```
 
-### 🔐 Autenticação (1)
-- `mint_installation_token.js` — Gerar token temporário
+### 🛠️ Utilities (1 script - Helpers)
+```bash
+utilities/
+└── generate-token.sh           # Gerar token para uso manual
+```
 
-### 🛠️ Utilities (1)
-- `generate-token.sh` — Gerar token para uso manual
+### ⚙️ Workflows (4 workflows prontos)
+```bash
+workflows/
+├── issue-tracking-workflow.sh      # Criar/processar issues
+├── pr-review-workflow.sh           # Criar/reviewer/merge PRs
+├── repository-monitoring.sh        # Relatório do repositório
+└── branch-management.sh            # Gerenciar branches
+```
 
 ---
 
-## 📁 Estrutura do Repositório
+## 📂 Estrutura Completa do Repositório
 
 ```
 skills/
-├── README.md                        # Este arquivo
-├── docs/                            # Documentação extra
-│   ├── API_REFERENCE.md            # Referência de todos os scripts
-│   ├── EXAMPLES.md                 # Exemplos de uso
-│   └── TROUBLESHOOTING.md          # Troubleshooting
+├── README.md                       # Este arquivo
+├── docs/                           # Documentação extra
+│   ├── API_REFERENCE.md           # Referência de todos os scripts
+│   ├── EXAMPLES.md                # Exemplos de uso
+│   └── TROUBLESHOOTING.md         # Troubleshooting
 ├── github-app/
-│   ├── SKILL.md                    # Documentação oficial
-│   ├── scripts/
-│   │   ├── *.js                    # Scripts individuais (23)
-│   │   ├── workflows/              # Workflows prontos (4)
-│   │   │   ├── issue-tracking-workflow.sh
-│   │   │   ├── pr-review-workflow.sh
-│   │   │   ├── repository-monitoring.sh
-│   │   │   └── branch-management.sh
-│   │   └── utilities/              # Funções auxiliares
-│   │       └── generate-token.sh
-│   └── references/                 # Materiais de referência
+│   ├── SKILL.md                   # Documentação oficial
+│   └── scripts/
+│       ├── queries/               # 📊 Leitura & Informação
+│       ├── issues/                # 📋 Gerenciar Issues
+│       ├── pulls/                 # 🔀 Gerenciar PRs
+│       ├── repositories/          # 📦 Gerenciar Repos
+│       ├── branches/              # 🌿 Gerenciar Branches
+│       ├── auth/                  # 🔐 Autenticação
+│       ├── utilities/             # 🛠️ Helpers
+│       ├── workflows/             # ⚙️ Workflows Prontos
+│       └── references/            # 📚 Materiais de Referência
 └── .gitignore
 ```
 
@@ -130,10 +158,10 @@ skills/
 
 ## ✨ Features
 
-✅ **Automação completa** — 23 scripts individuais + 4 workflows  
+✅ **28 scripts organizados** — 6 contextos diferentes + utilities  
+✅ **4 workflows prontos** — Execute operações complexas com 1 comando  
 ✅ **Autenticação segura** via GitHub App (sem PAT)  
-✅ **Workflows prontos** — Execute operações complexas com 1 comando  
-✅ **Organização em subpastas** — Scripts, workflows, utilities separados  
+✅ **Estrutura intuitiva** — Scripts agrupados por função  
 ✅ **Documentação detalhada** — API reference, exemplos, troubleshooting  
 ✅ **Testado em produção** — Todos os scripts foram testados  
 
@@ -141,14 +169,15 @@ skills/
 
 ## 🤝 Uso em Agentes
 
-**Para agentes:** Use os workflows prontos!
+**Para agentes:** Use os workflows prontos ou chame scripts diretamente pelo contexto!
 
 ```bash
-# ✅ Recomendado (1 linha)
+# ✅ Recomendado (1 linha com workflow)
 bash ~/.openclaw/skills/github-app/scripts/workflows/issue-tracking-workflow.sh repo title body labels
 
-# ou para scripts individuais
-node ~/.openclaw/skills/github-app/scripts/create-issue.js --repo owner/repo --title "Título"
+# Ou scripts individuais por contexto
+node ~/.openclaw/skills/github-app/scripts/queries/list-repos.js
+node ~/.openclaw/skills/github-app/scripts/issues/create-issue.js --repo owner/repo --title "Título"
 ```
 
 ---
@@ -167,7 +196,7 @@ Skill já configurada em `~/.openclaw/skills/github-app/` com credenciais via `o
 
 Verificar se está ativa:
 ```bash
-ls ~/.openclaw/skills/github-app/scripts/ | head
+ls ~/.openclaw/skills/github-app/scripts/queries/ | head
 ```
 
 ---
@@ -182,4 +211,4 @@ ls ~/.openclaw/skills/github-app/scripts/ | head
 
 **Mantido por:** Kael  
 **Última atualização:** 2026-02-27  
-**Versão:** 2.0.0 (Workflows + Reorganização)
+**Versão:** 2.1.0 (Scripts Organizados por Contexto)

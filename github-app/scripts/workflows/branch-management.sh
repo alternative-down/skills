@@ -21,13 +21,13 @@ case "$ACTION" in
   status)
     echo "📋 Listing all branches..."
     echo "========================================="
-    node "$SCRIPT_DIR/list-branches.js" --repo "$REPO"
+    node "$SCRIPT_DIR/queries/list-branches.js" --repo "$REPO"
     ;;
 
   protect)
     echo "🔒 Protecting main branch..."
     echo "========================================="
-    node "$SCRIPT_DIR/protect-branch.js" \
+    node "$SCRIPT_DIR/branches/protect-branch.js" \
       --repo "$REPO" \
       --branch main \
       --require_pr true \
@@ -54,7 +54,7 @@ case "$ACTION" in
     
     echo "🗑️  Deleting branch: $BRANCH_NAME"
     echo "========================================="
-    node "$SCRIPT_DIR/delete-branch.js" \
+    node "$SCRIPT_DIR/branches/delete-branch.js" \
       --repo "$REPO" \
       --branch "$BRANCH_NAME"
     

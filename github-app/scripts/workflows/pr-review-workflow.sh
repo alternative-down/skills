@@ -22,7 +22,7 @@ echo ""
 
 # 1. Criar PR
 echo "📝 [1/4] Criando Pull Request..."
-PR_OUTPUT=$(node "$SCRIPT_DIR/create-pr.js" \
+PR_OUTPUT=$(node "$SCRIPT_DIR/pulls/create-pr.js" \
   --repo "$REPO" \
   --title "$PR_TITLE" \
   --head "$PR_BRANCH" \
@@ -41,7 +41,7 @@ echo ""
 
 # 2. Atribuir reviewers
 echo "👥 [2/4] Atribuindo reviewers..."
-node "$SCRIPT_DIR/request-reviewers.js" \
+node "$SCRIPT_DIR/pulls/request-reviewers.js" \
   --repo "$REPO" \
   --number "$PR_NUM" \
   --reviewers "$REVIEWERS"
@@ -51,7 +51,7 @@ echo ""
 
 # 3. Listar reviews (para verificar estado)
 echo "📋 [3/4] Verificando reviews..."
-node "$SCRIPT_DIR/list-reviews.js" \
+node "$SCRIPT_DIR/queries/list-reviews.js" \
   --repo "$REPO" \
   --number "$PR_NUM"
 
@@ -59,7 +59,7 @@ echo ""
 
 # 4. Mergear PR
 echo "✅ [4/4] Mergeando PR..."
-node "$SCRIPT_DIR/merge-pr.js" \
+node "$SCRIPT_DIR/pulls/merge-pr.js" \
   --repo "$REPO" \
   --number "$PR_NUM" \
   --method squash \
