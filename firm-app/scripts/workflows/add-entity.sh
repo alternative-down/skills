@@ -3,6 +3,8 @@
 # Add a new entity and commit
 # Usage: ./add-entity.sh --type task --id my_task --field name "My Task"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
 cd /firm || exit 1
 
 # Pass all args to firm add
@@ -10,11 +12,8 @@ firm add "$@"
 
 if [ $? -eq 0 ]; then
   echo ""
-  echo "💾 Committing changes..."
-  git add .
-  git commit -m "feat: add new entity"
-  git push origin main 2>/dev/null || git push origin master
-  echo "✅ Entity created and pushed"
+  echo "💾 Syncing changes..."
+  "$SCRIPT_DIR/scripts/workflows/commit-push.sh" "feat: add new entity"
 else
   echo "❌ Failed to create entity"
   exit 1
