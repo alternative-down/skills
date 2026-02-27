@@ -7,9 +7,11 @@ MESSAGE="${1:-chore: sync workspace changes}"
 
 cd /firm || exit 1
 
-# Check if there are any changes
-if ! git diff --quiet; then
-  git add .
+# Stage all changes (including untracked files)
+git add .
+
+# Check if there are any staged changes
+if ! git diff --cached --quiet; then
   git commit -m "$MESSAGE"
   PUSH_RESULT=$(git push origin main 2>&1)
   
