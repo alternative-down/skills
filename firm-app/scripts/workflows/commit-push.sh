@@ -2,6 +2,7 @@
 
 # Commit and push Firm workspace changes
 # Usage: ./commit-push.sh "commit message"
+# Works from any directory
 
 MESSAGE="${1:-chore: sync workspace changes}"
 
@@ -13,13 +14,7 @@ git add .
 # Check if there are any staged changes
 if ! git diff --cached --quiet; then
   git commit -m "$MESSAGE"
-  PUSH_RESULT=$(git push origin main 2>&1)
-  
-  if echo "$PUSH_RESULT" | grep -q "error"; then
-    # Try master if main doesn't exist
-    git push origin master 2>/dev/null
-  fi
-  
+  git push origin main 2>/dev/null || git push origin master 2>/dev/null
   echo "✅ Changes committed and pushed"
 else
   echo "ℹ️  No changes to commit"

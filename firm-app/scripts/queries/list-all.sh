@@ -2,22 +2,22 @@
 
 # List all entities of a given type
 # Usage: ./list-all.sh <entity-type>
+# Works from any directory
 
 TYPE="${1:-task}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 if [ -z "$TYPE" ]; then
-  echo "Usage: ./list-all.sh <entity-type>"
-  echo "Examples: ./list-all.sh task, ./list-all.sh project, ./list-all.sh person"
+  echo "Usage: list-all.sh <entity-type>"
+  echo "Examples: list-all.sh task, list-all.sh project, list-all.sh person"
   exit 1
 fi
 
-cd /firm || exit 1
-firm list "$TYPE"
+firm -w /firm list "$TYPE"
 
 # Sync any changes
+cd /firm || exit 1
 if git diff --quiet; then
   exit 0
 fi
 
-"$SCRIPT_DIR/scripts/workflows/commit-push.sh" "chore: sync workspace changes"
+"$(dirname "$0")/../workflows/commit-push.sh" "chore: sync workspace changes"
