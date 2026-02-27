@@ -19,8 +19,8 @@ Integração segura com **Coolify** — gerenciador de deploy e orquestração d
 **URL:** https://coolify.alternativedown.com.br/
 
 **Credenciais obrigatórias** (configuradas em `~/.openclaw/openclaw.json`):
-- `COOLIFY_API_TOKEN` - API token para autenticação
-- `COOLIFY_BASE_URL` - URL base da instância Coolify
+- `COOLIFY_API_TOKEN` - API token para autenticação (gerado em Settings → API)
+- `COOLIFY_BASE_URL` - URL base da instância Coolify (ex: https://coolify.alternativedown.com.br)
 
 ## Query Scripts
 
@@ -55,6 +55,31 @@ node scripts/queries/get-server-info.js
 ```
 
 ## Action Scripts
+
+### `create-application.js`
+Create a new Coolify application from a GitHub repository.
+```bash
+node scripts/actions/create-application.js <name> <projectId> <repository> [options]
+```
+
+**Parameters:**
+- `<name>` - Application name
+- `<projectId>` - ID of the project
+- `<repository>` - GitHub repository in format `owner/repo`
+
+**Options:**
+- `--branch=<branch>` - Git branch to deploy (default: main)
+- `--buildpack=<buildpack>` - Build pack type: nodejs, static, docker (default: nodejs)
+- `--description=<desc>` - Application description
+- `--ports=<port>` - Port to expose (default: 3000)
+- `--env=<VAR=value>` - Environment variables (repeatable)
+
+**Examples:**
+```bash
+node scripts/actions/create-application.js landing-page 1 alternative-down/landing-page-saas --branch=main
+
+node scripts/actions/create-application.js myapp 1 owner/repo --ports=8080 --env=NODE_ENV=production --env=API_KEY=xxx
+```
 
 ### `deploy-application.js`
 Trigger a deployment for an application.
