@@ -1,3 +1,17 @@
+---
+name: firm-app
+description: "Query and manage the Firm workspace. List entities, execute queries, create entities with auto-commit to Git."
+metadata:
+  {
+    "openclaw":
+      {
+        "emoji": "📋",
+        "requires": { "bins": ["firm", "git"] },
+        "homepage": "https://firm.42futures.com/",
+      },
+  }
+---
+
 # Firm App Skill
 
 Query and manage the Firm workspace at `/firm` using provided scripts.
