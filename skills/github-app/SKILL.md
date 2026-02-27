@@ -112,7 +112,87 @@ git -C /path/to/repo push https://x-access-token:${TOKEN}@github.com/owner/repo.
 
 ---
 
-## ✏️ AÇÕES - Criar / Atualizar / Deletar
+## 🏢 AÇÕES - Repositórios
+
+### 📦 Criar Repositório
+
+```bash
+node {baseDir}/scripts/create-repo.js \
+  --name novo-repo \
+  --description "Descrição do repositório" \
+  --private false \
+  --issues true \
+  --projects true
+```
+
+**Parâmetros:**
+- `--name` (obrigatório) - Nome do repositório
+- `--description` (opcional) - Descrição
+- `--private` (opcional, padrão: false) - Privado ou público
+- `--issues` (opcional, padrão: true) - Habilitar issues
+- `--projects` (opcional, padrão: true) - Habilitar projects
+
+---
+
+### 📊 Obter Informações do Repositório
+
+```bash
+node {baseDir}/scripts/get-repo-info.js --repo owner/repo-name
+```
+
+Mostra informações completas: stars, forks, linguagem, datas, configurações.
+
+---
+
+### ✏️ Atualizar Repositório
+
+```bash
+node {baseDir}/scripts/update-repo.js \
+  --repo owner/repo-name \
+  --description "Nova descrição" \
+  --private false \
+  --issues true \
+  --projects false
+```
+
+**Parâmetros:**
+- `--repo` (obrigatório) - owner/repo-name
+- `--description` (opcional) - Nova descrição
+- `--private` (opcional) - Mudar privacidade
+- `--issues` (opcional) - Habilitar/desabilitar issues
+- `--projects` (opcional) - Habilitar/desabilitar projects
+
+---
+
+### 🗑️ Deletar Repositório
+
+```bash
+node {baseDir}/scripts/delete-repo.js --repo owner/repo-name
+```
+
+⚠️ **Requer confirmação manual** - Pede confirmação antes de deletar
+
+---
+
+### 🔒 Proteger Branch
+
+```bash
+node {baseDir}/scripts/protect-branch.js \
+  --repo owner/repo-name \
+  --branch main \
+  --require_pr true \
+  --require_review false
+```
+
+**Parâmetros:**
+- `--repo` (obrigatório) - owner/repo-name
+- `--branch` (obrigatório) - Nome da branch
+- `--require_pr` (opcional, padrão: true) - Exigir PR
+- `--require_review` (opcional, padrão: false) - Exigir review
+
+---
+
+## ✏️ AÇÕES - Issues / PRs / Branches
 
 ### 📌 Criar Issue
 
