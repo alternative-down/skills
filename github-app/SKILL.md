@@ -1,6 +1,6 @@
 ---
 name: github-app
-description: "Automação segura de GitHub: clone repos private, gerenciar issues/PRs, fazer commits, proteger branches. Autenticação via GitHub App (sem expor PAT)."
+description: "Clone private repos, create and manage GitHub issues and PRs, commit and push changes, protect branches. Use for automating GitHub workflows without exposing tokens."
 metadata:
   {
     "openclaw":

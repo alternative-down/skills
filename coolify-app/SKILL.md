@@ -1,6 +1,6 @@
 ---
 name: coolify-app
-description: "Deploy, monitor e gerenciar aplicações no Coolify: criar apps, triggerar deploys, restart containers, monitorar logs e saúde. Integração segura via API."
+description: "Create and manage Coolify applications, trigger deployments and builds, restart containers, monitor application health and logs. Use for infrastructure automation and deployment management."
 metadata:
   {
     "openclaw":
