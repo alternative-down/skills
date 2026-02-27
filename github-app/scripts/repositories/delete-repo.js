@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 const readline = require('readline');
 
 async function mintToken() {
-  const tokenScript = `${__dirname}/mint_installation_token.js`;
+  const tokenScript = `${__dirname}/../auth/mint_installation_token.js`;
   const token = execSync(`node ${tokenScript}`, { encoding: 'utf8' }).trim();
   return token;
 }
