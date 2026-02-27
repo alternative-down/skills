@@ -128,12 +128,6 @@ Show all entities connected to one:
 firm related organization acme_corp
 ```
 
-### MCP Server
-Run Firm as a Model Context Protocol server (for AI assistants):
-```bash
-firm mcp
-```
-
 ## File Organization
 
 The Firm workspace is just a directory with `.firm` files. Organize however you like:
@@ -225,6 +219,5 @@ Agents are expected to:
 ## Notes
 
 - Firm graph files (`.firm-graph*`) are excluded from Git
-- Use `firm mcp` to enable AI assistant integrations (Model Context Protocol)
 - Customize schemas in `.firm` files to match your business structure
 - Relationships are the heart of Firm—link everything together
