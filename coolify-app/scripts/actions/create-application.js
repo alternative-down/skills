@@ -16,44 +16,7 @@
  *   node create-application.js myapp 1 owner/repo --ports=8080 --env=NODE_ENV=production
  */
 
-const https = require('https');
-
-function makeRequest(method, path, body = null) {
-  return new Promise((resolve, reject) => {
-    const token = process.env.COOLIFY_API_TOKEN;
-    if (!token) {
-      reject(new Error('COOLIFY_API_TOKEN not set'));
-      return;
-    }
-
-    const options = {
-      hostname: 'coolify.alternativedown.com.br',
-      port: 443,
-      path: `/api/v1${path}`,
-      method,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          resolve({ status: res.statusCode, body: JSON.parse(data) });
-        } catch (e) {
-          resolve({ status: res.statusCode, body: data });
-        }
-      });
-    });
-
-    req.on('error', reject);
-    if (body) req.write(JSON.stringify(body));
-    req.end();
-  });
-}
+const { makeRequest } = require('../utilities/api-helper');
 
 function parseArgs() {
   const args = process.argv.slice(2);

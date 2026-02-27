@@ -19,8 +19,8 @@ Integração segura com **Coolify** — gerenciador de deploy e orquestração d
 **URL:** https://coolify.alternativedown.com.br/
 
 **Credenciais obrigatórias** (configuradas em `~/.openclaw/openclaw.json`):
-- `COOLIFY_API_TOKEN` - API token para autenticação
-- `COOLIFY_BASE_URL` - URL base da instância Coolify
+- `COOLIFY_API_TOKEN` - API token para autenticação (gerado em Settings → API)
+- `COOLIFY_BASE_URL` - URL base da instância Coolify (ex: https://coolify.alternativedown.com.br)
 
 ## Query Scripts
 
