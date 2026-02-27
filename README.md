@@ -10,151 +10,169 @@ Repositório de skills (habilidades) para **OpenClaw** — automações reutiliz
 
 Acesso seguro ao GitHub sem expor tokens. Suporta operações em repositórios, issues, PRs, branches, commits e reviews.
 
-**22 scripts prontos para produção:**
-
-#### 📊 Queries (5)
-- `list-repos` — Lista repositórios da organização
-- `list-issues` — Lista issues com filtros
-- `list-prs` — Lista pull requests
-- `list-branches` — Lista branches
-- `list-commits` — Lista commits
-
-#### 📝 Issues & Comments (4)
-- `create-issue` — Criar issue
-- `add-comment` — Comentar em issues/PRs
-- `add-labels` — Adicionar labels
-- `close-issue` — Fechar issue
-
-#### 🔀 Pull Requests (4)
-- `create-pr` — Criar PR
-- `merge-pr` — Mergear PR (merge/squash/rebase)
-- `list-reviews` — Listar reviews
-- `create-review` — Deixar review (APPROVE/REQUEST_CHANGES/COMMENT)
-- `request-reviewers` — Atribuir reviewers
-- `get-pr-diff` — Obter diff completo
-
-#### 🌿 Branches (2)
-- `delete-branch` — Deletar branch
-- `protect-branch` — Proteger branch
-
-#### 📦 Repositórios (4)
-- `create-repo` — Criar repositório
-- `get-repo-info` — Informações do repo
-- `update-repo` — Atualizar configurações
-- `delete-repo` — Deletar repositório
-
-#### 🔐 Autenticação (1)
-- `mint_installation_token` — Gerar token temporário
+**23 scripts individuais + 4 workflows prontos para produção:**
 
 ---
 
-## 🚀 Começar
+## 🚀 Quick Start
 
-### Setup
+### Workflows Prontos (Recomendado para Agentes)
 
-Skill já configurada em `~/.openclaw/skills/github-app/` com credenciais via `openclaw.json`:
+Execute workflows completos com um comando:
 
-```json
-{
-  "skills": {
-    "entries": {
-      "github-app": {
-        "enabled": true,
-        "env": {
-          "GITHUB_APP_ID": "...",
-          "GITHUB_APP_INSTALLATION_ID": "...",
-          "GITHUB_APP_PRIVATE_KEY_PATH": "..."
-        }
-      }
-    }
-  }
-}
-```
-
-### Uso Rápido
-
+#### 1️⃣ Issue Tracking Workflow
 ```bash
-# Listar repos
-node ~/.openclaw/skills/github-app/scripts/list-repos.js
-
-# Criar issue
-node ~/.openclaw/skills/github-app/scripts/create-issue.js \
-  --repo owner/repo \
-  --title "Título" \
-  --body "Descrição" \
-  --labels "bug,urgent"
-
-# Listar issues abertas
-node ~/.openclaw/skills/github-app/scripts/list-issues.js \
-  --repo owner/repo \
-  --state open
-
-# Deixar review em PR
-node ~/.openclaw/skills/github-app/scripts/create-review.js \
-  --repo owner/repo \
-  --number 42 \
-  --event APPROVE \
-  --body "Looks good!"
+bash ~/.openclaw/skills/github-app/scripts/workflows/issue-tracking-workflow.sh \
+  alternative-down/skills \
+  "Título da Issue" \
+  "Descrição" \
+  "label1,label2"
 ```
+✨ Cria issue → comenta → adiciona labels → fecha
+
+#### 2️⃣ PR Review & Merge Workflow
+```bash
+bash ~/.openclaw/skills/github-app/scripts/workflows/pr-review-workflow.sh \
+  alternative-down/skills \
+  feature-branch \
+  "Título do PR" \
+  "Descrição do PR" \
+  "reviewer1,reviewer2"
+```
+✨ Cria PR → atribui reviewers → deixa review → mergeia
+
+#### 3️⃣ Repository Monitoring
+```bash
+bash ~/.openclaw/skills/github-app/scripts/workflows/repository-monitoring.sh \
+  alternative-down/skills
+```
+✨ Relatório: repo info, PRs, issues, commits recentes
+
+#### 4️⃣ Branch Management
+```bash
+bash ~/.openclaw/skills/github-app/scripts/workflows/branch-management.sh \
+  alternative-down/skills \
+  status|protect|cleanup|delete-branch
+```
+✨ Listar, proteger, ou deletar branches
 
 ---
 
-## 📚 Documentação
+## 📚 Individual Scripts
 
-- **[github-app/SKILL.md](./github-app/SKILL.md)** — Documentação completa com exemplos
-- **[docs/](./docs/)** — Guias avançados e troubleshooting
+### 📊 Queries (5)
+- `list-repos.js` — Lista repositórios da organização
+- `list-issues.js` — Lista issues com filtros
+- `list-prs.js` — Lista pull requests
+- `list-branches.js` — Lista branches
+- `list-commits.js` — Lista commits
+
+### 📝 Issues & Comments (4)
+- `create-issue.js` — Criar issue
+- `add-comment.js` — Comentar em issues/PRs
+- `add-labels.js` — Adicionar labels
+- `close-issue.js` — Fechar issue
+
+### 🔀 Pull Requests (4)
+- `create-pr.js` — Criar PR
+- `merge-pr.js` — Mergear PR (merge/squash/rebase)
+- `list-reviews.js` — Listar reviews
+- `create-review.js` — Deixar review (APPROVE/REQUEST_CHANGES/COMMENT)
+- `request-reviewers.js` — Atribuir reviewers
+- `get-pr-diff.js` — Obter diff completo
+
+### 🌿 Branches (2)
+- `delete-branch.js` — Deletar branch
+- `protect-branch.js` — Proteger branch
+
+### 📦 Repositórios (4)
+- `create-repo.js` — Criar repositório
+- `get-repo-info.js` — Informações do repo
+- `update-repo.js` — Atualizar configurações
+- `delete-repo.js` — Deletar repositório
+
+### 💬 Code Reviews (1)
+- `add-review-comment.js` — Comentar em linhas específicas de código
+
+### 🔐 Autenticação (1)
+- `mint_installation_token.js` — Gerar token temporário
+
+### 🛠️ Utilities (1)
+- `generate-token.sh` — Gerar token para uso manual
 
 ---
 
-## 🔧 Estrutura
+## 📁 Estrutura do Repositório
 
 ```
 skills/
-├── README.md                      # Este arquivo
-├── docs/                          # Documentação extra
-│   ├── API_REFERENCE.md
-│   ├── EXAMPLES.md
-│   └── TROUBLESHOOTING.md
+├── README.md                        # Este arquivo
+├── docs/                            # Documentação extra
+│   ├── API_REFERENCE.md            # Referência de todos os scripts
+│   ├── EXAMPLES.md                 # Exemplos de uso
+│   └── TROUBLESHOOTING.md          # Troubleshooting
 ├── github-app/
-│   ├── SKILL.md                   # Documentação oficial
-│   ├── scripts/                   # 22 scripts prontos
-│   │   ├── list-repos.js
-│   │   ├── create-issue.js
-│   │   ├── create-review.js
-│   │   └── ... (19 mais)
-│   └── references/                # Materiais de referência
-└── dist/                          # Build artifacts
+│   ├── SKILL.md                    # Documentação oficial
+│   ├── scripts/
+│   │   ├── *.js                    # Scripts individuais (23)
+│   │   ├── workflows/              # Workflows prontos (4)
+│   │   │   ├── issue-tracking-workflow.sh
+│   │   │   ├── pr-review-workflow.sh
+│   │   │   ├── repository-monitoring.sh
+│   │   │   └── branch-management.sh
+│   │   └── utilities/              # Funções auxiliares
+│   │       └── generate-token.sh
+│   └── references/                 # Materiais de referência
+└── .gitignore
 ```
 
 ---
 
 ## ✨ Features
 
+✅ **Automação completa** — 23 scripts individuais + 4 workflows  
 ✅ **Autenticação segura** via GitHub App (sem PAT)  
-✅ **Operações completas** em repositórios, issues, PRs, branches  
-✅ **22 scripts** prontos para produção  
-✅ **Padrão consistente** — mintToken(), parseArgs(), HTTPS requests  
-✅ **Documentação detalhada** com exemplos  
-✅ **Testado** contra repositório real (alternative-down/skills)  
+✅ **Workflows prontos** — Execute operações complexas com 1 comando  
+✅ **Organização em subpastas** — Scripts, workflows, utilities separados  
+✅ **Documentação detalhada** — API reference, exemplos, troubleshooting  
+✅ **Testado em produção** — Todos os scripts foram testados  
 
 ---
 
 ## 🤝 Uso em Agentes
 
-Skills são injetados automaticamente em todos os agentes OpenClaw:
+**Para agentes:** Use os workflows prontos!
 
-```javascript
-// Dentro de um agente, chamar qualquer script
-const { execSync } = require('child_process');
+```bash
+# ✅ Recomendado (1 linha)
+bash ~/.openclaw/skills/github-app/scripts/workflows/issue-tracking-workflow.sh repo title body labels
 
-const repos = execSync(
-  'node ~/.openclaw/skills/github-app/scripts/list-repos.js'
-).toString();
+# ou para scripts individuais
+node ~/.openclaw/skills/github-app/scripts/create-issue.js --repo owner/repo --title "Título"
 ```
 
 ---
 
-## 📖 Referências
+## 📖 Documentação
+
+- **[API_REFERENCE.md](./docs/API_REFERENCE.md)** — Parâmetros de cada script
+- **[EXAMPLES.md](./docs/EXAMPLES.md)** — Exemplos de integração
+- **[TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)** — Solução de problemas
+
+---
+
+## 🔧 Setup
+
+Skill já configurada em `~/.openclaw/skills/github-app/` com credenciais via `openclaw.json`.
+
+Verificar se está ativa:
+```bash
+ls ~/.openclaw/skills/github-app/scripts/ | head
+```
+
+---
+
+## 📞 Referências
 
 - [GitHub App Documentation](https://docs.github.com/en/apps)
 - [GitHub REST API](https://docs.github.com/en/rest)
@@ -164,4 +182,4 @@ const repos = execSync(
 
 **Mantido por:** Kael  
 **Última atualização:** 2026-02-27  
-**Versão:** 1.0.0
+**Versão:** 2.0.0 (Workflows + Reorganização)
