@@ -1,6 +1,6 @@
 ---
 name: firm-app
-description: "Sistema de gestão de trabalho em Firm: listar tarefas/projetos, queries customizadas, criar entities, versionar em Git. Workspace unificado com auto-commit."
+description: "📋 Listar/criar tasks e projetos, fazer queries customizadas, registrar progresso — gestão de trabalho text-based com versionamento Git automático."
 metadata:
   {
     "openclaw":
