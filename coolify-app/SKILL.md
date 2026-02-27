@@ -57,28 +57,63 @@ node scripts/queries/get-server-info.js
 ## Action Scripts
 
 ### `create-application.js`
-Create a new Coolify application from a GitHub repository.
+Create a new Coolify application from a GitHub repository via GitHub App authentication.
+
 ```bash
-node scripts/actions/create-application.js <name> <projectId> <repository> [options]
+node scripts/actions/create-application.js <name> <git_repository> <git_branch> [options]
 ```
 
 **Parameters:**
 - `<name>` - Application name
-- `<projectId>` - ID of the project
-- `<repository>` - GitHub repository in format `owner/repo`
+- `<git_repository>` - GitHub repository in format `owner/repo`
+- `<git_branch>` - Git branch to deploy
 
-**Options:**
-- `--branch=<branch>` - Git branch to deploy (default: main)
-- `--buildpack=<buildpack>` - Build pack type: nodejs, static, docker (default: nodejs)
+**Required Options (choose one):**
+- `--environment-uuid=<uuid>` - Environment UUID (recommended - simplest option)
+- `--project-uuid=<uuid>` - Project UUID (if not using environment)
+
+**Required for GitHub App:**
+- `--github-app-uuid=<uuid>` - GitHub App UUID (get from Coolify settings)
+
+**Build Options:**
+- `--buildpack=<type>` - Build pack: nixpacks, static, dockerfile, dockercompose (default: nixpacks)
+- `--ports=<ports>` - Ports to expose (default: 3000)
+- `--build-cmd=<cmd>` - Custom build command
+- `--start-cmd=<cmd>` - Custom start command
+- `--install-cmd=<cmd>` - Custom install command
+
+**Application Options:**
 - `--description=<desc>` - Application description
-- `--ports=<port>` - Port to expose (default: 3000)
-- `--env=<VAR=value>` - Environment variables (repeatable)
+- `--domain=<domain>` - Custom domain for the application
+- `--base-dir=<dir>` - Base directory (default: /)
+- `--publish-dir=<dir>` - Publish directory (for static apps)
+
+**Feature Flags:**
+- `--is-static` - Mark as static application
+- `--is-spa` - Mark as SPA (single-page application)
+- `--auto-deploy` / `--no-auto-deploy` - Enable/disable auto-deploy on git push (default: enabled)
+- `--force-https` / `--no-force-https` - Enable/disable HTTPS forcing (default: enabled)
 
 **Examples:**
-```bash
-node scripts/actions/create-application.js landing-page 1 alternative-down/landing-page-saas --branch=main
 
-node scripts/actions/create-application.js myapp 1 owner/repo --ports=8080 --env=NODE_ENV=production --env=API_KEY=xxx
+Simple Node.js app:
+```bash
+node scripts/actions/create-application.js landing-page alternative-down/landing-page-saas main \
+  --environment-uuid=k8ow4o0o440088s08gwcwsc4 \
+  --github-app-uuid=YOUR_GH_APP_UUID \
+  --buildpack=nixpacks \
+  --ports=3000
+```
+
+Static app with custom build:
+```bash
+node scripts/actions/create-application.js my-landing alternative-down/landing-page-saas main \
+  --environment-uuid=YOUR_ENV_UUID \
+  --github-app-uuid=YOUR_GH_APP_UUID \
+  --is-static \
+  --buildpack=static \
+  --build-cmd="pnpm run build" \
+  --publish-dir=dist
 ```
 
 ### `deploy-application.js`
