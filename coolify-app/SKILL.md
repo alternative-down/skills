@@ -1,14 +1,14 @@
 ---
 name: coolify-app
-description: "Create and manage Coolify applications, trigger deployments and builds, restart containers, monitor application health and logs. Use for infrastructure automation and deployment management."
+description: "🚀 Acesso: Coolify API v1 (https://coolify.alternativedown.com.br). Cria aplicações, triggerem deployments, restarta containers, monitora saúde, acessa logs. Autenticação segura com Bearer token. Quando usar: criar apps de repos GitHub, fazer deploy de landing pages, reiniciar containers em debug, verificar logs e status, atualizar configurações. Proativo: quando repo novo criado → criar app automaticamente; quando work completo → deploy e verificar status; quando app crashear → reiniciar e trazer logs; em heartbeat → verificar saúde de todas apps. Exemplos: 'Deploy landing-page' → cria app e build; 'App crashing?' → logs e restart; 'Status de todas apps?' → lista health."
+homepage: https://coolify.io
 metadata:
   {
     "openclaw":
       {
         "emoji": "🚀",
-        "requires": { "bins": ["node"], "env": ["COOLIFY_API_TOKEN", "COOLIFY_BASE_URL"] },
-        "homepage": "https://coolify.io/",
-      },
+        "requires": { "bins": ["node"], "env": ["COOLIFY_API_TOKEN", "COOLIFY_BASE_URL"] }
+      }
   }
 ---
 

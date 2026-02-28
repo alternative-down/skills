@@ -1,14 +1,14 @@
 ---
 name: firm-app
-description: "Query and manage Firm workspace: list and create tasks and projects, execute custom queries with filtering and aggregation, register progress and update status. Use for work tracking and project management with automatic Git versioning."
+description: "📋 Acesso: Firm CLI + workspace /firm (versionado em Git automaticamente). Listar tarefas/projetos, criar entities, fazer queries customizadas, registrar progresso, atualizar status. Quando usar: verificar tasks abertas, criar nova tarefa, atualizar status conforme progresso, log de conclusão, gerar relatórios. Proativo: em morning standup → listar tasks abertas; ao completar trabalho → criar record 'completed'; quando bloqueado → atualizar status + comment; em heartbeat → verificar tasks priority/overdue; code pushed → criar 'completed' record com commit reference. Exemplos: 'What's on my plate?' → lista tasks abertas + deadlines; 'Finished landing page' → cria completed record; 'What's blocking?' → lista tasks bloqueadas e dependências; 'Progress report' → resume completed/in-progress/upcoming."
+homepage: https://firm.42futures.com
 metadata:
   {
     "openclaw":
       {
         "emoji": "📋",
-        "requires": { "bins": ["firm", "git"] },
-        "homepage": "https://firm.42futures.com/",
-      },
+        "requires": { "bins": ["firm", "git"] }
+      }
   }
 ---
 

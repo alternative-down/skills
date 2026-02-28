@@ -1,14 +1,14 @@
 ---
 name: github-app
-description: "Clone private repos, create and manage GitHub issues and PRs, commit and push changes, protect branches. Use for automating GitHub workflows without exposing tokens."
+description: "🐙 Acesso: GitHub API v3 (via GitHub App com autenticação segura). Clona repos privados, cria/gerencia issues e PRs, faz commits e protege branches sem expor tokens. Quando usar: acessar repositórios, documentar progresso, submeter mudanças para review, auditar commits. Proativo: quando mencionar repo, automaticamente clonar; ao completar trabalho, criar issue de documentação; ao fazer push, criar PR automaticamente. Exemplos: 'Clone landing-page-saas' → clona e prepara; 'Terminei o design' → cria issue documentando; 'Review commits' → lista e resume mudanças."
+homepage: https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps
 metadata:
   {
     "openclaw":
       {
         "emoji": "🐙",
-        "requires": { "bins": ["node"], "env": ["GITHUB_APP_ID", "GITHUB_APP_INSTALLATION_ID", "GITHUB_APP_PRIVATE_KEY_PATH"] },
-        "homepage": "https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps",
-      },
+        "requires": { "bins": ["node"], "env": ["GITHUB_APP_ID", "GITHUB_APP_INSTALLATION_ID", "GITHUB_APP_PRIVATE_KEY_PATH"] }
+      }
   }
 ---
 
