@@ -1,15 +1,49 @@
 ---
 name: github-app
-description: "Clone private repos, create and manage GitHub issues and PRs, commit and push changes, protect branches. Use for automating GitHub workflows without exposing tokens."
+emoji: 🐙
+description: "Automatiza GitHub: clona privados, cria issues/PRs, sincroniza código, protege branches. Autenticação segura via GitHub App (sem expor tokens)."
+
+toolAccess:
+  tool: GitHub API v3 (via GitHub App authentication)
+  authentication: GitHub App with private key authentication
+  mounted: ~/.openclaw/skills/github-app/scripts/
+  requiredEnv:
+    - GITHUB_APP_ID (app identifier)
+    - GITHUB_APP_INSTALLATION_ID (installation scope)
+    - GITHUB_APP_PRIVATE_KEY_PATH (PEM private key)
+  scripts:
+    queries: 8 (list repos, list issues, get commits, etc)
+    issues: 4 (create, update, close, add comment)
+    pulls: 5 (create, update, merge, review, request reviewers)
+    branches: 2 (protect, unprotect)
+    workflows: 4 (complete automation pipelines)
+
+whenToUse:
+  - "Clone or access private GitHub repositories"
+  - "Automatically document completed work as GitHub issues"
+  - "Submit code changes via pull requests for review"
+  - "Audit recent commits before merging"
+  - "Manage branch protection rules"
+  - "Close issues when work is done"
+  - "Integrate repos with other systems"
+
+whenProactive:
+  - User mentions a repo name (alternative-down/[name]) → clone and prepare
+  - Work is completed (landing page done, bug fixed) → create issue to document
+  - Code pushed to feature branch → automatically create PR with description
+  - Need to audit changes → run commit history check
+  - Deploy task starts → verify branch protections are in place
+
+exampleTriggers:
+  - "I need to work on landing-page-saas" → Kael clones repo, sets up environment
+  - "I finished the design system" → Kael creates issue documenting completion
+  - "Push feature to alternative-down/skills" → Kael creates PR with changelog
+  - "Review the last 5 commits" → Kael lists commits and summarizes changes
+
 metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "🐙",
-        "requires": { "bins": ["node"], "env": ["GITHUB_APP_ID", "GITHUB_APP_INSTALLATION_ID", "GITHUB_APP_PRIVATE_KEY_PATH"] },
-        "homepage": "https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps",
-      },
-  }
+  openclaw:
+    requires: { "bins": ["node"], "env": ["GITHUB_APP_ID", "GITHUB_APP_INSTALLATION_ID", "GITHUB_APP_PRIVATE_KEY_PATH"] }
+    homepage: "https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps"
 ---
 
 # GitHub App Skill 🐙

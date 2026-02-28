@@ -1,15 +1,50 @@
 ---
 name: firm-app
-description: "Query and manage Firm workspace: list and create tasks and projects, execute custom queries with filtering and aggregation, register progress and update status. Use for work tracking and project management with automatic Git versioning."
+emoji: 📋
+description: "Gerencia tarefas e projetos em Firm. List, cria, queries customizadas, registra progresso. Versionamento Git automático — work tracking integrado com controle de versão."
+
+toolAccess:
+  tool: Firm CLI (text-based work management)
+  workspace: /firm (shared, version-controlled)
+  repository: alternative-down/firm (auto-commit + auto-push)
+  authentication: Local git auth (automatic, no tokens)
+  mounted: ~/.openclaw/skills/firm-app/scripts/
+  requiredBins:
+    - firm (CLI for Firm workspace)
+    - git (auto-commit and version control)
+  scripts:
+    queries: 8 (list-all, query, search, filter by status/type/author)
+    management: 4 (add-entity, update-entity, change-status, add-comment)
+    workflows: 3 (commit-push, dependency-audit, progress-report)
+
+whenToUse:
+  - "Check all outstanding tasks and projects"
+  - "Query tasks by status (open, in-progress, blocked, done)"
+  - "Create new task or project for upcoming work"
+  - "Update task status as work progresses"
+  - "Log work completion with details and metrics"
+  - "Find dependencies between tasks"
+  - "Generate progress reports for current work"
+
+whenProactive:
+  - Morning standup → list all open tasks, summarize progress
+  - Task completion → automatically create completed task record
+  - Blocker encountered → update status and comment with context
+  - Daily heartbeat → check for high-priority/overdue tasks
+  - Week start → query all open tasks and upcoming deadlines
+  - Code pushed → create 'completed' task record with commit reference
+
+exampleTriggers:
+  - "What's on my plate?" → Kael lists all open tasks + next deadlines
+  - "I finished the landing page design" → Kael creates 'completed' record with details
+  - "Mark task #42 as done" → Kael updates status + auto-commits
+  - "What's blocking us?" → Kael queries blocked tasks and their dependencies
+  - "Progress report" → Kael generates summary of completed/in-progress/upcoming
+
 metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "📋",
-        "requires": { "bins": ["firm", "git"] },
-        "homepage": "https://firm.42futures.com/",
-      },
-  }
+  openclaw:
+    requires: { "bins": ["firm", "git"] }
+    homepage: "https://firm.42futures.com/"
 ---
 
 # Firm App Skill 📋

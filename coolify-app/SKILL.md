@@ -1,15 +1,48 @@
 ---
 name: coolify-app
-description: "Create and manage Coolify applications, trigger deployments and builds, restart containers, monitor application health and logs. Use for infrastructure automation and deployment management."
+emoji: 🚀
+description: "Deploy, monitora e gerencia apps no Coolify. Crie aplicações, triggerem builds, restarte containers, acesse logs. Automação de infraestrutura sem expor API tokens."
+
+toolAccess:
+  tool: Coolify API v1 (infrastructure as code)
+  instance: https://coolify.alternativedown.com.br
+  authentication: Bearer token (API token from Settings → API)
+  mounted: ~/.openclaw/skills/coolify-app/scripts/
+  requiredEnv:
+    - COOLIFY_API_TOKEN (API authentication token)
+    - COOLIFY_BASE_URL (instance URL, e.g. https://coolify.alternativedown.com.br)
+  scripts:
+    queries: 5 (list projects, list apps, get app config, get logs, validate token)
+    actions: 7 (create app, restart app, deploy app, update settings, delete app)
+    monitoring: (health checks, log retrieval, status monitoring)
+
+whenToUse:
+  - "Create new applications from GitHub repos"
+  - "Deploy landing page or microservices"
+  - "Restart containers when debugging"
+  - "Check application logs for errors"
+  - "Monitor application health status"
+  - "Update app configuration (env vars, build commands)"
+  - "Trigger full deployment pipeline"
+
+whenProactive:
+  - New GitHub repo created → automatically create Coolify app
+  - Landing page ready to deploy → create app + trigger build
+  - App crashing → restart container and check logs
+  - Need to verify deployment status → check health and logs
+  - Configuration changed → update Coolify settings without manual UI access
+
+exampleTriggers:
+  - "Deploy landing-page-saas to Coolify" → Kael creates app with GitHub integration
+  - "App is crashing" → Kael checks logs, restarts container, returns status
+  - "What's the status of the portal?" → Kael lists all apps, shows health
+  - "Update env variable for API_KEY" → Kael modifies app config and redeployed
+  - "Get logs from landing page" → Kael retrieves and displays container logs
+
 metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "🚀",
-        "requires": { "bins": ["node"], "env": ["COOLIFY_API_TOKEN", "COOLIFY_BASE_URL"] },
-        "homepage": "https://coolify.io/",
-      },
-  }
+  openclaw:
+    requires: { "bins": ["node"], "env": ["COOLIFY_API_TOKEN", "COOLIFY_BASE_URL"] }
+    homepage: "https://coolify.io/"
 ---
 
 # Coolify App Skill 🚀
